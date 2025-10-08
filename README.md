@@ -1,78 +1,100 @@
-# 🧠 **Exploratory Analysis — MLOps Hotel Reservation Prediction**
+Perfect 👍 — here’s the **fully updated README** for your **Data Preprocessing stage**, now including the “How to Run” section and preserving your established formatting and tone.
 
-This branch represents the **data scientist’s experimental stage**, where the **Hotel Reservations dataset** (previously ingested from Google Cloud Storage) is explored, cleaned, and analysed within a **Jupyter Notebook** environment.
+---
 
-The purpose of this stage is to **understand the data**, perform **EDA and preprocessing experiments**, and identify **key modelling strategies** — before the workflow is modularised and automated by an ML engineer in the next stage.
+# ⚙️ **Data Preprocessing — MLOps Hotel Reservation Prediction**
 
+This branch marks the transition from **notebook experimentation** to a **modular, reproducible data preprocessing pipeline**.
+Following the insights gained during the **Exploratory Analysis** stage, the data scientist’s workflow has now been **refactored into Python scripts** that can be reused, parameterised, and integrated into the full MLOps pipeline.
 
+The goal of this stage is to **automate the cleaning, encoding, transformation, and feature selection process** used in the notebook — establishing a solid, repeatable foundation for model training in the next stage.
 
-## 🧾 **What This Stage Includes**
+## 🧾 **What’s New in This Stage**
 
-* ✅ Jupyter Notebook (`notebooks/notebook.ipynb`) for interactive exploration
-* ✅ Initial data validation (missing values, duplicates, column inspection)
-* ✅ Exploratory data analysis (univariate, bivariate, and correlation)
-* ✅ Preprocessing (encoding, transformations, feature checks)
-* ✅ Class balancing using **SMOTE**
-* ✅ Baseline modelling with multiple ML algorithms
-* ✅ Random Forest feature importance and quick hyperparameter tuning
-* ✅ Final model persistence (`random_forest.pkl`) for downstream use
+This branch introduces several key updates and new modules:
 
-This notebook acts as a **sandbox** for a data scientist — a place to experiment freely before refactoring the workflow into modular scripts and pipeline stages.
+* 🆕 **`src/data_preprocessing.py`** — a fully modular script encapsulating all data cleaning, encoding, class balancing, and feature selection logic within a single `DataProcessor` class.
+  This design was made possible thanks to experimentation and validation in the previous notebook stage.
+* 🔧 **`config/config.yaml`** — updated to include configurable parameters for categorical/numerical columns, skewness threshold, and number of features to select.
+* 🗺️ **`config/paths_config.py`** — updated to define new paths for processed outputs (`PROCESSED_TRAIN_DATA_PATH`, `PROCESSED_TEST_DATA_PATH`).
+* 🧰 **`utils/common_functions.py`** — extended with helper utilities such as `read_yaml()` and `load_data()` for consistent data access across modules.
+* 📦 **New output folder:** `artifacts/processed/` — automatically created by the preprocessing pipeline to store `processed_train.csv` and `processed_test.csv`.
 
+## 🧩 **Key Functionalities**
 
+The new `DataProcessor` class performs the following steps end-to-end:
+
+1. **Data Cleaning** — drops unnecessary columns (`Unnamed: 0`, `Booking_ID`) and duplicates.
+2. **Categorical Encoding** — applies label encoding to categorical columns defined in YAML.
+3. **Skewness Handling** — uses `np.log1p()` to transform highly skewed numeric features.
+4. **Class Balancing** — applies **SMOTE** to mitigate booking status imbalance.
+5. **Feature Selection** — selects top-N important features using a `RandomForestClassifier`.
+6. **Data Saving** — writes the cleaned and balanced datasets to the new `artifacts/processed/` directory.
+
+Each transformation step is logged using the centralised project logger and wrapped with a custom exception handler for traceable debugging.
+
+## 🧠 **How to Run the Pipeline**
+
+After activating your virtual environment and installing dependencies:
+
+```bash
+python src/data_preprocessing.py
+```
+
+This command executes the full preprocessing workflow:
+
+* Loads raw training and test data from `artifacts/raw/`
+* Applies cleaning, encoding, balancing, and feature selection
+* Saves processed outputs to `artifacts/processed/processed_train.csv` and `processed_test.csv`
 
 ## 🗂️ **Updated Project Structure**
 
 ```
 mlops-hotel-reservation-prediction/
 ├── artifacts/
-│   ├── raw/                        # From previous data ingestion stage
-│       ├── raw.csv
-│       ├── train.csv
-│       └── test.csv
-├── notebooks/
-│   └── notebook.ipynb              # 🔍 Data scientist EDA & experimentation
+│   ├── raw/                             # From previous ingestion stage
+│   │   ├── raw.csv
+│   │   ├── train.csv
+│   │   └── test.csv
+│   └── processed/                       # 🆕 Newly created by this stage
+│       ├── processed_train.csv
+│       └── processed_test.csv
 ├── config/
-│   ├── config.yaml
-│   └── paths_config.py
+│   ├── config.yaml                      # 🔧 Updated with preprocessing params
+│   └── paths_config.py                  # 🔧 Updated with processed paths
 ├── src/
 │   ├── data_ingestion.py
+│   ├── data_preprocessing.py            # 🆕 Main preprocessing pipeline module
 │   ├── logger.py
 │   ├── custom_exception.py
 │   └── __init__.py
 ├── utils/
-│   └── common_functions.py
+│   └── common_functions.py              # 🔧 Extended helper functions
+├── notebooks/
+│   └── notebook.ipynb                   # From previous EDA stage
 ├── requirements.txt
 ├── setup.py
-└── README.md                       # 📖 You are here
+└── README.md                            # 📖 You are here
 ```
 
-> 💡 The notebook uses `artifacts/raw/train.csv` and `test.csv` generated in the previous **Data Ingestion from GCP** stage.
+## 🔍 **Pipeline Highlights**
 
+Within `src/data_preprocessing.py`, the `DataProcessor` class:
 
+* Loads raw CSVs from `artifacts/raw/`
+* Applies consistent, YAML-driven transformations
+* Balances and filters features automatically
+* Saves the processed outputs ready for model training
 
-## 🧩 **Notebook Highlights**
+The pipeline ensures **reproducibility**, **traceability**, and **config-driven control**, setting the foundation for scalable MLOps automation.
 
-Within `notebooks/notebook.ipynb`, you’ll find clearly documented sections covering:
+## 🚀 **Next Stage — Model Training**
 
-1. **Setup & Imports** — all required libraries configured for reproducibility
-2. **Data Loading** — reads from `artifacts/raw/train.csv`
-3. **Exploratory Data Analysis (EDA)** — distributions, correlations, relationships
-4. **Preprocessing & Encoding** — label encoding, skewness correction, VIF check
-5. **Class Balancing** — SMOTE applied to address booking imbalance
-6. **Modelling Experiments** — Random Forest, Gradient Boosting, Logistic Regression, etc.
-7. **Hyperparameter Tuning** — lightweight `RandomizedSearchCV` example
-8. **Model Persistence** — saves `random_forest.pkl` for inference or modular pipelines
+In the next branch, the project evolves into a **Model Training** stage, where the processed data will feed into a modular training pipeline that:
 
+* Loads preprocessed data from `artifacts/processed/`
+* Trains, evaluates, and saves machine learning models
+* Logs experiments to **MLflow** for versioning and reproducibility
+* Prepares models for downstream **inference and deployment**
 
-
-## 🚀 **Next Stage — Modular Data Processing**
-
-In the next branch, the **data scientist’s experimental workflow** will be translated into a **modular, production-ready data processing pipeline**:
-
-* Code moved from notebook → `src/data_processing/` modules
-* Configurable parameters defined in YAML
-* Unit tests and CI integration added
-* Integration with MLflow and model registry prepared
-
-This marks the transition from **exploration → engineering** — bridging experimentation and full MLOps automation.
+This stage completes the transformation from **raw data → clean, ready-to-train datasets**, paving the way for **automated model experimentation and evaluation** in the next phase.

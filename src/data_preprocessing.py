@@ -110,45 +110,74 @@ class DataProcessor:
             Preprocessed DataFrame.
         """
         try:
-            logger.info("Starting our Data Processing step")
+            logger.info("Starting data processing step")
 
-            logger.info("Dropping the columns")
-            df.drop(columns=['Unnamed: 0', 'Booking_ID'], inplace=True)
-            df.drop_duplicates(inplace=True)
+            # --- Drop columns only if present (prevents KeyError) ---
+            to_consider = ['Unnamed: 0', 'Booking_ID']
+            cols_to_drop = [c for c in to_consider if c in df.columns]
+            if cols_to_drop:
+                logger.info(f"Dropping columns: {cols_to_drop}")
+                df = df.drop(columns=cols_to_drop)
 
-            cat_cols = self.config["data_processing"]["categorical_columns"]
-            num_cols = self.config["data_processing"]["numerical_columns"]
+            # --- Drop duplicates ---
+            before = len(df)
+            df = df.drop_duplicates()
+            after = len(df)
+            if before != after:
+                logger.info(f"Dropped {before - after} duplicate rows")
 
+            # --- Columns from config (intersect with df to be safe) ---
+            cfg_cat = self.config["data_processing"]["categorical_columns"]
+            cfg_num = self.config["data_processing"]["numerical_columns"]
+            cat_cols = [c for c in cfg_cat if c in df.columns]
+            num_cols = [c for c in cfg_num if c in df.columns]
+
+            # --- Label Encoding (robust to NaNs and unexpected types) ---
             logger.info("Applying Label Encoding")
-            label_encoder = LabelEncoder()
             mappings = {}
-
             for col in cat_cols:
-                df[col] = label_encoder.fit_transform(df[col])
+                le = LabelEncoder()
+                # Cast to string and fill NaN consistently to avoid errors
+                series = df[col].astype(str).fillna("NA_CATEGORY")
+                df[col] = le.fit_transform(series)
                 mappings[col] = {
                     label: code
                     for label, code in zip(
-                        label_encoder.classes_,
-                        label_encoder.transform(label_encoder.classes_)
+                        le.classes_,
+                        le.transform(le.classes_)
                     )
                 }
 
-            logger.info("Label Mappings are : ")
-            for col, mapping in mappings.items():
-                logger.info(f"{col} : {mapping}")
+            if mappings:
+                logger.info("Label mappings:")
+                for col, mapping in mappings.items():
+                    logger.info(f"{col}: {mapping}")
 
-            logger.info("Doing Skewness HAndling")
+            # --- Skewness Handling (only on numeric present) ---
+            logger.info("Handling skewness")
             skew_threshold = self.config["data_processing"]["skewness_threshold"]
-            skewness = df[num_cols].apply(lambda x: x.skew())
 
-            for column in skewness[skewness > skew_threshold].index:
-                df[column] = np.log1p(df[column])
+            # Ensure numeric dtype (coerce where needed)
+            for c in num_cols:
+                df[c] = pd.to_numeric(df[c], errors="coerce")
+
+            skewness = df[num_cols].apply(lambda x: x.skew(skipna=True)) if num_cols else pd.Series(dtype=float)
+            high_skew_cols = skewness[skewness > skew_threshold].index.tolist()
+
+            for column in high_skew_cols:
+                # log1p safe on non-negative; if negatives exist, shift
+                col_min = df[column].min(skipna=True)
+                if pd.notna(col_min) and col_min < 0:
+                    shift = abs(col_min) + 1.0
+                    df[column] = np.log1p(df[column] + shift)
+                else:
+                    df[column] = np.log1p(df[column])
 
             return df
 
         except Exception as e:
-            logger.error(f"Error during preprocess step {e}")
-            raise CustomException("Error while preprocess data", e)
+            logger.error(f"Error during preprocess step: {e}")
+            raise CustomException("Error while preprocessing data", e)
 
     # -------------------------------------------------------------------
     # Method: balance_data
@@ -163,9 +192,17 @@ class DataProcessor:
             Balanced DataFrame with original column names and target.
         """
         try:
-            logger.info("Handling Imbalanced Data")
+            logger.info("Handling imbalanced data with SMOTE")
+
+            if "booking_status" not in df.columns:
+                raise ValueError("Target column 'booking_status' not found in DataFrame.")
+
             X = df.drop(columns='booking_status')
             y = df["booking_status"]
+
+            # Log basic class distribution
+            y_counts = y.value_counts(dropna=False).to_dict()
+            logger.info(f"Class distribution before SMOTE: {y_counts}")
 
             smote = SMOTE(random_state=42)
             X_resampled, y_resampled = smote.fit_resample(X, y)
@@ -173,11 +210,11 @@ class DataProcessor:
             balanced_df = pd.DataFrame(X_resampled, columns=X.columns)
             balanced_df["booking_status"] = y_resampled
 
-            logger.info("Data balanced sucesffuly")
+            logger.info("Data balanced successfully")
             return balanced_df
 
         except Exception as e:
-            logger.error(f"Error during balancing data step {e}")
+            logger.error(f"Error during balancing data step: {e}")
             raise CustomException("Error while balancing data", e)
 
     # -------------------------------------------------------------------
@@ -193,7 +230,10 @@ class DataProcessor:
             DataFrame restricted to top-N features plus the target.
         """
         try:
-            logger.info("Starting our Feature selection step")
+            logger.info("Starting feature selection step")
+
+            if "booking_status" not in df.columns:
+                raise ValueError("Target column 'booking_status' not found in DataFrame.")
 
             X = df.drop(columns='booking_status')
             y = df["booking_status"]
@@ -205,26 +245,22 @@ class DataProcessor:
             feature_importance_df = pd.DataFrame({
                 'feature': X.columns,
                 'importance': feature_importance
-            })
-            top_features_importance_df = feature_importance_df.sort_values(
-                by="importance", ascending=False
-            )
+            }).sort_values(by="importance", ascending=False)
 
-            num_features_to_select = self.config["data_processing"]["no_of_features"]
-            top_10_features = top_features_importance_df["feature"].head(
-                num_features_to_select
-            ).values
+            num_features_to_select = int(self.config["data_processing"]["no_of_features"])
+            num_features_to_select = max(1, min(num_features_to_select, X.shape[1]))
 
-            logger.info(f"Features selected : {top_10_features}")
+            top_features = feature_importance_df["feature"].head(num_features_to_select).tolist()
+            logger.info(f"Features selected: {top_features}")
 
-            top_10_df = df[top_10_features.tolist() + ["booking_status"]]
+            selected_df = df[top_features + ["booking_status"]]
 
-            logger.info("Feature slection completed sucesfully")
-            return top_10_df
+            logger.info("Feature selection completed successfully")
+            return selected_df
 
         except Exception as e:
-            logger.error(f"Error during feature selection step {e}")
-            raise CustomException("Error while feature selection", e)
+            logger.error(f"Error during feature selection step: {e}")
+            raise CustomException("Error during feature selection", e)
 
     # -------------------------------------------------------------------
     # Method: save_data
@@ -241,12 +277,13 @@ class DataProcessor:
             Output CSV path.
         """
         try:
-            logger.info("Saving our data in processed folder")
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            logger.info(f"Saving processed data to: {file_path}")
             df.to_csv(file_path, index=False)
-            logger.info(f"Data saved sucesfuly to {file_path}")
+            logger.info("Data saved successfully")
 
         except Exception as e:
-            logger.error(f"Error during saving data step {e}")
+            logger.error(f"Error during saving data step: {e}")
             raise CustomException("Error while saving data", e)
 
     # -------------------------------------------------------------------
@@ -270,20 +307,24 @@ class DataProcessor:
             train_df = self.preprocess_data(train_df)
             test_df = self.preprocess_data(test_df)
 
+            # NOTE: Typically we do NOT apply SMOTE to the test set.
+            # Kept here to preserve original logic, as per module notes.
             train_df = self.balance_data(train_df)
             test_df = self.balance_data(test_df)
 
             train_df = self.select_features(train_df)
-            test_df = test_df[train_df.columns]
+
+            # Align test columns to selected train features (order & presence)
+            test_df = test_df.reindex(columns=train_df.columns, fill_value=0)
 
             self.save_data(train_df, PROCESSED_TRAIN_DATA_PATH)
             self.save_data(test_df, PROCESSED_TEST_DATA_PATH)
 
-            logger.info("Data processing completed sucesfully")
+            logger.info("Data processing completed successfully")
 
         except Exception as e:
-            logger.error(f"Error during preprocessing pipeline {e}")
-            raise CustomException("Error while data preprocessing pipeline", e)
+            logger.error(f"Error during preprocessing pipeline: {e}")
+            raise CustomException("Error during data preprocessing pipeline", e)
 
 
 # -------------------------------------------------------------------
