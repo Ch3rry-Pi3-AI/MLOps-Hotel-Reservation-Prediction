@@ -35,14 +35,3 @@ CONFIG_PATH = "config/config.yaml"
 PROCESSED_DIR = "artifacts/processed"
 PROCESSED_TRAIN_DATA_PATH = os.path.join(PROCESSED_DIR, "processed_train.csv")
 PROCESSED_TEST_DATA_PATH = os.path.join(PROCESSED_DIR, "processed_test.csv")
-
-# -------------------------------------------------------------------
-# 🧠 MODEL TRAINING
-# -------------------------------------------------------------------
-MODELS_DIR = "artifacts/models"
-MODEL_OUTPUT_PATH = os.path.join(MODELS_DIR, "lgbm_model.pkl")
-
-# Ensure key directories exist
-os.makedirs(RAW_DIR, exist_ok=True)
-os.makedirs(PROCESSED_DIR, exist_ok=True)
-os.makedirs(MODELS_DIR, exist_ok=True)
