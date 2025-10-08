@@ -32,7 +32,7 @@ LIGHTGBM_PARAMS = {
     'max_depth': randint(5, 50),                # Depth of each tree
     'learning_rate': uniform(0.01, 0.2),        # Step size shrinkage
     'num_leaves': randint(20, 100),             # Maximum number of leaves per tree
-    'boosting_type': ['gbdt', 'dart', 'goss']   # Gradient boosting variants
+    'boosting_type': ['gbdt', 'dart']           # Gradient boosting variants
 }
 
 # -------------------------------------------------------------------
