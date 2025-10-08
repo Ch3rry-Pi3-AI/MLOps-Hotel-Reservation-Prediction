@@ -27,12 +27,9 @@ This notebook acts as a **sandbox** for a data scientist — a place to experime
 mlops-hotel-reservation-prediction/
 ├── artifacts/
 │   ├── raw/                        # From previous data ingestion stage
-│   │   ├── raw.csv
-│   │   ├── train.csv
-│   │   └── test.csv
-│   ├── processed/                  # (to be created in next modular stage)
-│   └── models/
-│       └── random_forest.pkl       # Saved best model
+│       ├── raw.csv
+│       ├── train.csv
+│       └── test.csv
 ├── notebooks/
 │   └── notebook.ipynb              # 🔍 Data scientist EDA & experimentation
 ├── config/
