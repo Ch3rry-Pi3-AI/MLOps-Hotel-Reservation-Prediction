@@ -261,4 +261,4 @@ python src/data_ingestion.py
 
 ## 🚀 **What’s Next**
 
-In the next branch, we’ll implement **exploratory data analysis (EDA) and data preprocessing** using the outputs from `artifacts/raw/`, then persist standardised datasets under `artifacts/processed/` with full logging and unit tests.
+In the next branch, we’ll implement **Jupyter Notebook Testing** using the outputs from `artifacts/raw/`.
