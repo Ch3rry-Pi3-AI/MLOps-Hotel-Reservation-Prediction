@@ -125,7 +125,7 @@ class DataIngestion:
 
             data = pd.read_csv(RAW_FILE_PATH)
             train_data, test_data = train_test_split(
-                data, test_size=1 - self.train_test_ratio, random_state=42
+                data, test_size=1 - self.train_test_ratio, random_state=5901
             )
 
             train_data.to_csv(TRAIN_FILE_PATH, index=False)
