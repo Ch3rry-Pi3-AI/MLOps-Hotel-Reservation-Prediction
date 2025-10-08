@@ -1,0 +1,205 @@
+/* -------------------------------------------------------------
+   Design Tokens (easy theming)
+-------------------------------------------------------------- */
+:root {
+    --bg: #f6f8fa;
+    --card-bg: #ffffff;
+    --text: #333333;
+    --muted: #555555;
+
+    --accent: #0077b6;   /* primary accent */
+    --accent-2: #0096c7; /* hover */
+    --border: #e5e7eb;
+
+    --success: #2b9348;
+    --danger: #d90429;
+
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+}
+
+/* -------------------------------------------------------------
+   Global Reset
+-------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* -------------------------------------------------------------
+   Base
+-------------------------------------------------------------- */
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px;
+    line-height: 1.4;
+}
+
+/* -------------------------------------------------------------
+   Container & Header
+-------------------------------------------------------------- */
+.container {
+    width: 100%;
+    max-width: 880px;
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 40px 36px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+header h1 {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 0.975rem;
+}
+
+/* -------------------------------------------------------------
+   Form
+-------------------------------------------------------------- */
+.prediction-form {
+    width: 100%;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group label {
+    display: inline-block;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+input[type="number"],
+select {
+    width: 100%;
+    padding: 12px 12px;
+    font-size: 0.975rem;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+input[type="number"]:focus,
+select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.15);
+}
+
+/* Remove number input spinners (Chrome/Edge) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+/* Remove number input spinners (Firefox) */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* -------------------------------------------------------------
+   Buttons
+-------------------------------------------------------------- */
+.button-container {
+    margin-top: 8px;
+    text-align: center;
+}
+
+.btn-submit {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 12px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.06s ease;
+}
+
+.btn-submit:hover {
+    background: var(--accent-2);
+}
+
+.btn-submit:active {
+    transform: translateY(1px);
+}
+
+/* -------------------------------------------------------------
+   Result
+-------------------------------------------------------------- */
+.result {
+    margin-top: 28px;
+    padding: 16px 18px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: #fafafa;
+}
+
+.result .cancel {
+    color: var(--danger);
+}
+
+.result .no-cancel {
+    color: var(--success);
+}
+
+/* -------------------------------------------------------------
+   Responsive
+-------------------------------------------------------------- */
+@media (max-width: 900px) {
+    .container {
+        padding: 28px 22px;
+    }
+}
+
+@media (max-width: 720px) {
+    .form-grid {
+        grid-template-columns: 1fr; /* stack columns */
+        gap: 20px;
+    }
+
+    header h1 {
+        font-size: 1.7rem;
+    }
+}

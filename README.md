@@ -1,36 +1,54 @@
-# 🧩 **Training Pipeline — MLOps Hotel Reservation Prediction**
+# 🧠 **Inference Stage — Flask Application for Hotel Reservation Prediction**
 
-This branch connects all previous modules — **data ingestion**, **data preprocessing**, and **model training** — into a single, orchestrated workflow.
-The new **pipeline script** automates the entire process from raw data to a trained model artefact, establishing a reproducible and maintainable structure for future automation and CI/CD integration.
+This branch introduces the **Flask-based inference layer**, transforming the trained model into a **live, interactive web application** that allows users to make hotel reservation predictions in real time.
 
-This stage was made easier thanks to the **modular design** of the earlier stages and the prior **notebook experimentation**, which defined the logic now formalised into pipeline components.
+It bridges the gap between **model training** and **end-user interaction**, deploying a simple yet elegant web interface that takes input features, runs the trained model, and returns the predicted outcome instantly.
+
+---
 
 ## 🧾 **What’s New in This Stage**
 
-* 🆕 **`pipeline/training_pipeline.py`** — a unified entrypoint that runs all stages sequentially:
+* 🆕 **`app.py`** — Flask application that loads the trained model and exposes a prediction route.
 
-  1. Data Ingestion
-  2. Data Preprocessing
-  3. Model Training
-* 🧠 **Full automation** of the previously manual workflow — no need to run each module individually.
-* 🔧 **`config/paths_config.py`** and existing modules are reused for consistent path and configuration management.
-* 🪶 **Lighter README** since the logic remains unchanged — this stage focuses on orchestration.
+* 🎨 **`templates/index.html`** — Responsive, emoji-enhanced HTML form for feature input.
 
-## ⚙️ **How to Run the Full Pipeline**
+* 💅 **`static/style.css`** — Modern UI design with clean, accessible styling and responsive layout.
 
-After activating your virtual environment:
+* 🎬 **Interactive Flask App Demo:**
+
+  ![Hotel Reservation App Demo](img/flask_app/hotel_reservation_app.gif)
+
+* 🔍 **Predictive Workflow**
+
+  * Users input booking details such as `lead_time`, `avg_price_per_room`, and `room_type_reserved`.
+  * Flask collects the inputs, formats them as a NumPy array, and passes them to the loaded model.
+  * The app returns whether the reservation is likely to be **cancelled** or **honoured**.
+
+---
+
+## ⚙️ **How to Run the Flask Application**
+
+After activating your virtual environment and ensuring all dependencies are installed:
 
 ```bash
-python pipeline/training_pipeline.py
+python app.py
 ```
 
-This command will:
+Then open your browser and navigate to:
 
-1. Ingest the raw data from your configured source
-2. Preprocess and balance the dataset
-3. Train and evaluate the LightGBM model
-4. Save the trained model artefact to `artifacts/models/lgbm_model.pkl`
-5. Log results and parameters to **MLflow**
+```
+http://127.0.0.1:8080
+```
+
+or simply:
+
+```
+http://localhost:8080
+```
+
+You’ll see the interactive form to input reservation details and view instant predictions.
+
+---
 
 ## 🗂️ **Updated Project Structure**
 
@@ -45,8 +63,6 @@ mlops-hotel-reservation-prediction/
 │   ├── config.yaml
 │   ├── paths_config.py
 │   └── model_params.py
-├── pipeline/
-│   └── training_pipeline.py            # 🆕 Unified pipeline entrypoint
 ├── src/
 │   ├── data_ingestion.py
 │   ├── data_preprocessing.py
@@ -56,24 +72,45 @@ mlops-hotel-reservation-prediction/
 │   └── __init__.py
 ├── utils/
 │   └── common_functions.py
+├── pipeline/
+│   └── training_pipeline.py
+├── templates/
+│   └── index.html                     # 🆕 Flask HTML interface
+├── static/
+│   └── style.css                      # 🆕 UI styling
 ├── img/
-│   └── model_training/
-│       ├── mlflow_experiment.png
-│       └── mlflow_run.png
+│   ├── model_training/
+│   │   ├── mlflow_experiment.png
+│   │   └── mlflow_run.png
+│   └── flask_app/
+│       └── hotel_reservation_app.gif  # 🖼️ Demo of the web interface
 ├── notebooks/
 │   └── notebook.ipynb
+├── app.py                             # 🆕 Flask inference application
 ├── requirements.txt
 ├── setup.py
 └── README.md
 ```
 
-## 🚀 **Next Stage — Flask Application**
+---
 
-The next branch will focus on **creating a Flask application** to serve the trained model for real-time predictions.
-This will involve:
+## 🧩 **Key Components**
 
-* Loading the saved model (`artifacts/models/lgbm_model.pkl`)
-* Building clean REST API endpoints
-* Enabling integration with frontend interfaces or external systems
+| File / Folder                       | Description                                                             |
+| ----------------------------------- | ----------------------------------------------------------------------- |
+| `app.py`                            | Core Flask app handling requests, input parsing, and model inference.   |
+| `templates/index.html`              | User-facing HTML form to collect reservation data.                      |
+| `static/style.css`                  | Modern CSS for consistent, responsive design.                           |
+| `artifacts/models/lgbm_model.pkl`   | Trained LightGBM model used for predictions.                            |
+| `logger.py` / `custom_exception.py` | Unified logging and error handling modules reused from previous stages. |
 
-This stage marks the start of the **deployment layer** of your MLOps project — transitioning from model training to **model serving**.
+---
+
+## 🚀 **Next Stage — CI/CD with Jenkins & Google Cloud Run**
+
+The next branch will implement **Continuous Integration and Continuous Deployment (CI/CD)** for this Flask application using:
+
+* 🧩 **Jenkins** — to automate build, test, and deployment pipelines.
+* ☁️ **Google Cloud Run** — to deploy the containerised Flask app as a scalable, serverless API service.
+
+This will mark the project’s transition from local inference to **production-grade model deployment** in the cloud.
