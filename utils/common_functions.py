@@ -1,7 +1,7 @@
 """
 common_functions.py
 -------------------
-Shared utility functions for configuration loading and dataset IO.
+Shared utility functions for configuration loading.
 
 This module provides:
 1) `read_yaml` - reads YAML configuration (defaults to `config/config.yaml`).
@@ -12,10 +12,9 @@ The functions integrate with the project-wide logger and raise
 Usage
 -----
 Example:
-    from utils.common_functions import read_yaml, load_data
+    from utils.common_functions import read_yaml
 
     cfg = read_yaml()  # uses CONFIG_PATH from config/paths_config.py
-    df  = load_data("artifacts/raw/train.csv")
 
 Notes
 -----
