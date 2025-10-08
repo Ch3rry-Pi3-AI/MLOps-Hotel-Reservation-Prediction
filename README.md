@@ -15,14 +15,12 @@ This branch adds a **fully scripted data ingestion stage** that pulls the Hotel 
 
 ```
 mlops-hotel-reservation-prediction/
-├── artifacts/                                      # 📦 Model artefacts and outputs
-│   ├── processed/                                  #   (future stage)
-│   ├── models/                                     #   (future stage)
+├── artifacts/                                      # 📦 rtefacts and outputs
 │   └── raw/                                        #   Created at runtime by data ingestion
 │       ├── raw.csv                                 #   Downloaded dataset (after run)
 │       ├── train.csv                               #   Train split (after run)
 │       └── test.csv                                #   Test split (after run)
-├── config/                                         # ⚙️ Config for pipeline stages
+├── config/                                         
 │   ├── __init__.py
 │   ├── config.yaml                                 #   NEW: data ingestion params (bucket, file, ratio)
 │   └── paths_config.py                             #   NEW: central path constants
@@ -36,29 +34,26 @@ mlops-hotel-reservation-prediction/
 │       ├── service_account_permissions.png
 │       ├── add_principal.png
 │       └── create_key.png
-├── notebook/                                       # 📓 Exploration & tests
-│   └── README.md
+├── notebook/                                       
 ├── pipeline/
-│   ├── __init__.py
-│   └── README.md
-├── src/                                            # 🧠 Core source package
+├── src/                                            
 │   ├── __init__.py
 │   ├── custom_exception.py                         #   Detailed, consistent error handling
 │   ├── logger.py                                   #   Centralised daily logging
 │   └── data_ingestion.py                           #   NEW: GCS download & train/test split
-├── static/                                         # 🧱 Static assets
+├── static/                                         
 │   └── README.md
-├── templates/                                      # 🪶 Docs/deployment templates
+├── templates/                                      
 │   └── README.md
-├── utils/                                          # 🧰 Shared utilities
+├── utils/                                          
 │   ├── __init__.py
-│   └── common_functions.py                         #   YAML reader & CSV loader
-├── MLOps_Hotel_Reservation_Prediction.egg-info/    # 📁 Auto-generated after `pip install -e .`
-├── .gitignore                                      # 🚫 Ignore rules
+│   └── common_functions.py                         #   YAML reader
+├── MLOps_Hotel_Reservation_Prediction.egg-info/    
+├── .gitignore                                      
 ├── README.md                                       # 📖 You are here
-├── requirements.txt                                # 📦 Dependencies
-├── setup.py                                        # ⚙️ Package metadata
-└── venv/                                           # 🧩 Local virtual environment (ignored)
+├── requirements.txt                                
+├── setup.py                                        
+└── venv/                                           
 ```
 
 > 💡 **Note:** The `raw/` folder and CSVs are created when you run the ingestion script.
