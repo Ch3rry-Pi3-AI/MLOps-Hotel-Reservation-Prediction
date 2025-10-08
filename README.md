@@ -1,100 +1,98 @@
-Perfect 👍 — here’s the **fully updated README** for your **Data Preprocessing stage**, now including the “How to Run” section and preserving your established formatting and tone.
+# 🤖 **Model Training — MLOps Hotel Reservation Prediction**
 
----
+This branch turns the **preprocessed datasets** into a **trained, versioned model** with experiment tracking via **MLflow**.
+Crucially, this stage was made **much easier** thanks to the insights and validated transformations from the earlier **notebook experimentation** stage.
 
-# ⚙️ **Data Preprocessing — MLOps Hotel Reservation Prediction**
-
-This branch marks the transition from **notebook experimentation** to a **modular, reproducible data preprocessing pipeline**.
-Following the insights gained during the **Exploratory Analysis** stage, the data scientist’s workflow has now been **refactored into Python scripts** that can be reused, parameterised, and integrated into the full MLOps pipeline.
-
-The goal of this stage is to **automate the cleaning, encoding, transformation, and feature selection process** used in the notebook — establishing a solid, repeatable foundation for model training in the next stage.
+The goal here is to **train, tune, evaluate, and persist** a LightGBM classifier in a **reproducible, configurable** way—ready for downstream inference and deployment.
 
 ## 🧾 **What’s New in This Stage**
 
-This branch introduces several key updates and new modules:
-
-* 🆕 **`src/data_preprocessing.py`** — a fully modular script encapsulating all data cleaning, encoding, class balancing, and feature selection logic within a single `DataProcessor` class.
-  This design was made possible thanks to experimentation and validation in the previous notebook stage.
-* 🔧 **`config/config.yaml`** — updated to include configurable parameters for categorical/numerical columns, skewness threshold, and number of features to select.
-* 🗺️ **`config/paths_config.py`** — updated to define new paths for processed outputs (`PROCESSED_TRAIN_DATA_PATH`, `PROCESSED_TEST_DATA_PATH`).
-* 🧰 **`utils/common_functions.py`** — extended with helper utilities such as `read_yaml()` and `load_data()` for consistent data access across modules.
-* 📦 **New output folder:** `artifacts/processed/` — automatically created by the preprocessing pipeline to store `processed_train.csv` and `processed_test.csv`.
+* 🆕 **`src/model_training.py`** — end-to-end training pipeline (load → tune → evaluate → save → log to MLflow).
+* 🆕 **`config/model_params.py`** — tidy LightGBM search space and `RandomizedSearchCV` settings.
+* 🔧 **`config/paths_config.py`** — extended with `MODELS_DIR` and `MODEL_OUTPUT_PATH`.
+* 🖼️ **Images for docs:** `img/model_training/mlflow_experiment.png`, `img/model_training/mlflow_run.png`.
+* 📦 **New output folder:** `artifacts/models/` — contains the saved model `lgbm_model.pkl`.
 
 ## 🧩 **Key Functionalities**
 
-The new `DataProcessor` class performs the following steps end-to-end:
+The training pipeline provides:
 
-1. **Data Cleaning** — drops unnecessary columns (`Unnamed: 0`, `Booking_ID`) and duplicates.
-2. **Categorical Encoding** — applies label encoding to categorical columns defined in YAML.
-3. **Skewness Handling** — uses `np.log1p()` to transform highly skewed numeric features.
-4. **Class Balancing** — applies **SMOTE** to mitigate booking status imbalance.
-5. **Feature Selection** — selects top-N important features using a `RandomForestClassifier`.
-6. **Data Saving** — writes the cleaned and balanced datasets to the new `artifacts/processed/` directory.
+1. **Data loading & split** — expects `processed_train.csv` and `processed_test.csv` (from the previous stage).
+2. **Hyperparameter search** — `RandomizedSearchCV` over a **LightGBM** search space.
+3. **Evaluation** — Accuracy, Precision, Recall, and F1 reported on the held-out test set.
+4. **Model persistence** — stores the best estimator at `artifacts/models/lgbm_model.pkl`.
+5. **Experiment tracking** — datasets, params, metrics, and model artefacts logged to **MLflow**.
 
-Each transformation step is logged using the centralised project logger and wrapped with a custom exception handler for traceable debugging.
+## 🧠 **How to Run**
 
-## 🧠 **How to Run the Pipeline**
-
-After activating your virtual environment and installing dependencies:
+### 1) Train the model
 
 ```bash
-python src/data_preprocessing.py
+python src/model_training.py
 ```
 
-This command executes the full preprocessing workflow:
+### 2) View experiments in MLflow
 
-* Loads raw training and test data from `artifacts/raw/`
-* Applies cleaning, encoding, balancing, and feature selection
-* Saves processed outputs to `artifacts/processed/processed_train.csv` and `processed_test.csv`
+```bash
+mlflow ui --host 127.0.0.1 --port 5555
+```
+
+Then open: [http://127.0.0.1:5555](http://127.0.0.1:5555)
+
+<p align="center">
+  <img src="img/model_training/mlflow_experiment.png" alt="MLflow Experiment List" width="720" />
+</p>
+
+<p align="center">
+  <img src="img/model_training/mlflow_run.png" alt="MLflow Single Run Details" width="720" />
+</p>
 
 ## 🗂️ **Updated Project Structure**
+
+Only additions/updates from the previous stage are shown with markers.
 
 ```
 mlops-hotel-reservation-prediction/
 ├── artifacts/
-│   ├── raw/                             # From previous ingestion stage
-│   │   ├── raw.csv
-│   │   ├── train.csv
-│   │   └── test.csv
-│   └── processed/                       # 🆕 Newly created by this stage
-│       ├── processed_train.csv
-│       └── processed_test.csv
+│   ├── processed/
+│   │   ├── processed_train.csv
+│   │   └── processed_test.csv
+│   └── models/                         # 🆕 model artefacts
+│       └── lgbm_model.pkl
 ├── config/
-│   ├── config.yaml                      # 🔧 Updated with preprocessing params
-│   └── paths_config.py                  # 🔧 Updated with processed paths
+│   ├── config.yaml
+│   ├── paths_config.py                 # 🔧 added MODEL_OUTPUT_PATH / models dir
+│   └── model_params.py                 # 🆕 LightGBM + RandomizedSearch params
+├── img/
+│   └── model_training/                 # 🆕 documentation images
+│       ├── mlflow_experiment.png
+│       └── mlflow_run.png
 ├── src/
-│   ├── data_ingestion.py
-│   ├── data_preprocessing.py            # 🆕 Main preprocessing pipeline module
+│   ├── data_preprocessing.py
+│   ├── model_training.py               # 🆕 training pipeline
 │   ├── logger.py
 │   ├── custom_exception.py
 │   └── __init__.py
 ├── utils/
-│   └── common_functions.py              # 🔧 Extended helper functions
+│   └── common_functions.py
 ├── notebooks/
-│   └── notebook.ipynb                   # From previous EDA stage
+│   └── notebook.ipynb
 ├── requirements.txt
 ├── setup.py
-└── README.md                            # 📖 You are here
+└── README.md                           # 📖 you are here
 ```
 
 ## 🔍 **Pipeline Highlights**
 
-Within `src/data_preprocessing.py`, the `DataProcessor` class:
+* **Config-driven:** model search space and CV settings live in `config/model_params.py`.
+* **Consistent paths:** all inputs/outputs resolved via `config/paths_config.py`.
+* **Reproducible runs:** MLflow captures **datasets**, **parameters**, **metrics**, and the **model artefact**.
+* **Balanced training data:** assumes the prior stage produced balanced, feature-selected datasets.
 
-* Loads raw CSVs from `artifacts/raw/`
-* Applies consistent, YAML-driven transformations
-* Balances and filters features automatically
-* Saves the processed outputs ready for model training
 
-The pipeline ensures **reproducibility**, **traceability**, and **config-driven control**, setting the foundation for scalable MLOps automation.
+## 🚀 **What’s Next — Training Pipeline Automation**
 
-## 🚀 **Next Stage — Model Training**
+The next branch will focus on **building a modular training pipeline**, integrating the model training process into a repeatable, automated workflow.
+This stage will introduce **structured pipeline orchestration**, enabling scheduled retraining, experiment reproducibility, and seamless handoff into CI/CD systems.
 
-In the next branch, the project evolves into a **Model Training** stage, where the processed data will feed into a modular training pipeline that:
-
-* Loads preprocessed data from `artifacts/processed/`
-* Trains, evaluates, and saves machine learning models
-* Logs experiments to **MLflow** for versioning and reproducibility
-* Prepares models for downstream **inference and deployment**
-
-This stage completes the transformation from **raw data → clean, ready-to-train datasets**, paving the way for **automated model experimentation and evaluation** in the next phase.
+It will combine the preprocessing and model training components into a unified, end-to-end pipeline — the foundation for scalable **MLOps automation**.
