@@ -1,98 +1,79 @@
-# 🤖 **Model Training — MLOps Hotel Reservation Prediction**
+# 🧩 **Training Pipeline — MLOps Hotel Reservation Prediction**
 
-This branch turns the **preprocessed datasets** into a **trained, versioned model** with experiment tracking via **MLflow**.
-Crucially, this stage was made **much easier** thanks to the insights and validated transformations from the earlier **notebook experimentation** stage.
+This branch connects all previous modules — **data ingestion**, **data preprocessing**, and **model training** — into a single, orchestrated workflow.
+The new **pipeline script** automates the entire process from raw data to a trained model artefact, establishing a reproducible and maintainable structure for future automation and CI/CD integration.
 
-The goal here is to **train, tune, evaluate, and persist** a LightGBM classifier in a **reproducible, configurable** way—ready for downstream inference and deployment.
+This stage was made easier thanks to the **modular design** of the earlier stages and the prior **notebook experimentation**, which defined the logic now formalised into pipeline components.
 
 ## 🧾 **What’s New in This Stage**
 
-* 🆕 **`src/model_training.py`** — end-to-end training pipeline (load → tune → evaluate → save → log to MLflow).
-* 🆕 **`config/model_params.py`** — tidy LightGBM search space and `RandomizedSearchCV` settings.
-* 🔧 **`config/paths_config.py`** — extended with `MODELS_DIR` and `MODEL_OUTPUT_PATH`.
-* 🖼️ **Images for docs:** `img/model_training/mlflow_experiment.png`, `img/model_training/mlflow_run.png`.
-* 📦 **New output folder:** `artifacts/models/` — contains the saved model `lgbm_model.pkl`.
+* 🆕 **`pipeline/training_pipeline.py`** — a unified entrypoint that runs all stages sequentially:
 
-## 🧩 **Key Functionalities**
+  1. Data Ingestion
+  2. Data Preprocessing
+  3. Model Training
+* 🧠 **Full automation** of the previously manual workflow — no need to run each module individually.
+* 🔧 **`config/paths_config.py`** and existing modules are reused for consistent path and configuration management.
+* 🪶 **Lighter README** since the logic remains unchanged — this stage focuses on orchestration.
 
-The training pipeline provides:
+## ⚙️ **How to Run the Full Pipeline**
 
-1. **Data loading & split** — expects `processed_train.csv` and `processed_test.csv` (from the previous stage).
-2. **Hyperparameter search** — `RandomizedSearchCV` over a **LightGBM** search space.
-3. **Evaluation** — Accuracy, Precision, Recall, and F1 reported on the held-out test set.
-4. **Model persistence** — stores the best estimator at `artifacts/models/lgbm_model.pkl`.
-5. **Experiment tracking** — datasets, params, metrics, and model artefacts logged to **MLflow**.
-
-## 🧠 **How to Run**
-
-### 1) Train the model
+After activating your virtual environment:
 
 ```bash
-python src/model_training.py
+python pipeline/training_pipeline.py
 ```
 
-### 2) View experiments in MLflow
+This command will:
 
-```bash
-mlflow ui --host 127.0.0.1 --port 5555
-```
-
-Then open: [http://127.0.0.1:5555](http://127.0.0.1:5555)
-
-<p align="center">
-  <img src="img/model_training/mlflow_experiment.png" alt="MLflow Experiment List" width="720" />
-</p>
-
-<p align="center">
-  <img src="img/model_training/mlflow_run.png" alt="MLflow Single Run Details" width="720" />
-</p>
+1. Ingest the raw data from your configured source
+2. Preprocess and balance the dataset
+3. Train and evaluate the LightGBM model
+4. Save the trained model artefact to `artifacts/models/lgbm_model.pkl`
+5. Log results and parameters to **MLflow**
 
 ## 🗂️ **Updated Project Structure**
-
-Only additions/updates from the previous stage are shown with markers.
 
 ```
 mlops-hotel-reservation-prediction/
 ├── artifacts/
+│   ├── raw/
 │   ├── processed/
-│   │   ├── processed_train.csv
-│   │   └── processed_test.csv
-│   └── models/                         # 🆕 model artefacts
+│   └── models/
 │       └── lgbm_model.pkl
 ├── config/
 │   ├── config.yaml
-│   ├── paths_config.py                 # 🔧 added MODEL_OUTPUT_PATH / models dir
-│   └── model_params.py                 # 🆕 LightGBM + RandomizedSearch params
-├── img/
-│   └── model_training/                 # 🆕 documentation images
-│       ├── mlflow_experiment.png
-│       └── mlflow_run.png
+│   ├── paths_config.py
+│   └── model_params.py
+├── pipeline/
+│   └── training_pipeline.py            # 🆕 Unified pipeline entrypoint
 ├── src/
+│   ├── data_ingestion.py
 │   ├── data_preprocessing.py
-│   ├── model_training.py               # 🆕 training pipeline
+│   ├── model_training.py
 │   ├── logger.py
 │   ├── custom_exception.py
 │   └── __init__.py
 ├── utils/
 │   └── common_functions.py
+├── img/
+│   └── model_training/
+│       ├── mlflow_experiment.png
+│       └── mlflow_run.png
 ├── notebooks/
 │   └── notebook.ipynb
 ├── requirements.txt
 ├── setup.py
-└── README.md                           # 📖 you are here
+└── README.md
 ```
 
-## 🔍 **Pipeline Highlights**
+## 🚀 **Next Stage — Flask Application**
 
-* **Config-driven:** model search space and CV settings live in `config/model_params.py`.
-* **Consistent paths:** all inputs/outputs resolved via `config/paths_config.py`.
-* **Reproducible runs:** MLflow captures **datasets**, **parameters**, **metrics**, and the **model artefact**.
-* **Balanced training data:** assumes the prior stage produced balanced, feature-selected datasets.
+The next branch will focus on **creating a Flask application** to serve the trained model for real-time predictions.
+This will involve:
 
+* Loading the saved model (`artifacts/models/lgbm_model.pkl`)
+* Building clean REST API endpoints
+* Enabling integration with frontend interfaces or external systems
 
-## 🚀 **What’s Next — Training Pipeline Automation**
-
-The next branch will focus on **building a modular training pipeline**, integrating the model training process into a repeatable, automated workflow.
-This stage will introduce **structured pipeline orchestration**, enabling scheduled retraining, experiment reproducibility, and seamless handoff into CI/CD systems.
-
-It will combine the preprocessing and model training components into a unified, end-to-end pipeline — the foundation for scalable **MLOps automation**.
+This stage marks the start of the **deployment layer** of your MLOps project — transitioning from model training to **model serving**.
