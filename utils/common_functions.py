@@ -5,7 +5,6 @@ Shared utility functions for configuration loading and dataset IO.
 
 This module provides:
 1) `read_yaml` - reads YAML configuration (defaults to `config/config.yaml`).
-2) `load_data` - loads CSV datasets into pandas DataFrames.
 
 The functions integrate with the project-wide logger and raise
 `CustomException` for consistent, descriptive error handling.
@@ -86,37 +85,3 @@ def read_yaml(file_path: str = CONFIG_PATH) -> dict:
         logger.error(f"Error while reading YAML file '{file_path}': {e}")
         import sys
         raise CustomException("Failed to read YAML configuration", sys) from e
-
-
-# -------------------------------------------------------------------
-# Function: load_data
-# -------------------------------------------------------------------
-def load_data(csv_path: str) -> pd.DataFrame:
-    """
-    Load a CSV file into a pandas DataFrame.
-
-    Parameters
-    ----------
-    csv_path : str
-        Path to the CSV file.
-
-    Returns
-    -------
-    pandas.DataFrame
-        The loaded dataset.
-
-    Raises
-    ------
-    CustomException
-        If the CSV cannot be read or parsed.
-    """
-    try:
-        logger.info(f"Loading data from: {csv_path}")
-        df = pd.read_csv(csv_path)
-        logger.info(f"Data loaded successfully: shape={df.shape}")
-        return df
-
-    except Exception as e:
-        logger.error(f"Error while loading data from '{csv_path}': {e}")
-        import sys
-        raise CustomException("Failed to load data", sys) from e
