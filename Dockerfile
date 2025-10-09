@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------
-# 🧱 Base Image (pin to a version with PyArrow wheels)
+# 🧱 Base Image
 # -------------------------------------------------------------------
 FROM python:3.13-slim
 
@@ -39,9 +39,9 @@ COPY . .
 RUN pip install -e .
 
 # -------------------------------------------------------------------
-# 🧪 Optional: Train the model at build time (kept from your original)
-#   Note: many teams run training as a separate CI job or at runtime
-#         rather than during image build.
+# 🧪 Optional: Train the model at build time 
+#    Note: many teams run training as a separate CI job or at runtime
+#          rather than during image build.
 # -------------------------------------------------------------------
 RUN python pipeline/training_pipeline.py
 

@@ -37,5 +37,5 @@ data_processing:
     - avg_price_per_room
     - no_of_special_requests
 
-  skewness_threshold: 5                                       # Threshold for log1p transform
-  no_of_features: 10                                           # Number of top features to retain
+  skewness_threshold: 5                                         # Threshold for log1p transform
+  no_of_features: 10                                            # Number of top features to retain
