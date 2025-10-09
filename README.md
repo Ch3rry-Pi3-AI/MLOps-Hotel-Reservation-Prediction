@@ -4,7 +4,7 @@ This branch introduces the **Flask-based inference layer**, transforming the tra
 
 It bridges the gap between **model training** and **end-user interaction**, deploying a simple yet elegant web interface that takes input features, runs the trained model, and returns the predicted outcome instantly.
 
----
+
 
 ## 🧾 **What’s New in This Stage**
 
@@ -24,7 +24,7 @@ It bridges the gap between **model training** and **end-user interaction**, depl
   * Flask collects the inputs, formats them as a NumPy array, and passes them to the loaded model.
   * The app returns whether the reservation is likely to be **cancelled** or **honoured**.
 
----
+
 
 ## ⚙️ **How to Run the Flask Application**
 
@@ -48,7 +48,7 @@ http://localhost:8080
 
 You’ll see the interactive form to input reservation details and view instant predictions.
 
----
+
 
 ## 🗂️ **Updated Project Structure**
 
@@ -92,7 +92,7 @@ mlops-hotel-reservation-prediction/
 └── README.md
 ```
 
----
+
 
 ## 🧩 **Key Components**
 
@@ -104,7 +104,7 @@ mlops-hotel-reservation-prediction/
 | `artifacts/models/lgbm_model.pkl`   | Trained LightGBM model used for predictions.                            |
 | `logger.py` / `custom_exception.py` | Unified logging and error handling modules reused from previous stages. |
 
----
+
 
 ## 🚀 **Next Stage — CI/CD with Jenkins & Google Cloud Run**
 
