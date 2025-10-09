@@ -3,7 +3,7 @@ pipeline{
 
     environment {
         VENV_DIR = 'venv'
-        GCP_PROJECT = "mlops-new-447207"
+        GCP_PROJECT = "sacred-garden-474511-b9"
         GCLOUD_PATH = "/var/jenkins_home/google-cloud-sdk/bin"
     }
 
@@ -27,6 +27,31 @@ pipeline{
                     pip install --upgrade pip
                     pip install -e .
                     '''
+                }
+            }
+        }
+
+        stage('Building and Pushing Docker Image to GCR'){
+            steps{
+                withCredentials([file(credentialsId: 'gcp-key' , variable : 'GOOGLE_APPLICATION_CREDENTIALS')]){
+                    script{
+                        echo 'Building and Pushing Docker Image to GCR...'
+                        sh '''
+                        export PATH=$PATH:${GCLOUD_PATH}
+
+
+                        gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+
+                        gcloud config set project ${GCP_PROJECT}
+
+                        gcloud auth configure-docker --quiet
+
+                        docker build -t gcr.io/${GCP_PROJECT}/ml-hotel-reservation:latest .
+
+                        docker push gcr.io/${GCP_PROJECT}/ml-hotel-reservation:latest 
+
+                        '''
+                    }
                 }
             }
         }
