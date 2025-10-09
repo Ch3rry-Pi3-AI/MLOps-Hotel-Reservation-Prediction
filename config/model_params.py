@@ -39,7 +39,7 @@ LIGHTGBM_PARAMS = {
 # 🎯 RANDOMISED SEARCH CONFIGURATION
 # -------------------------------------------------------------------
 RANDOM_SEARCH_PARAMS = {
-    'n_iter': 1,                # Number of random parameter combinations to try
+    'n_iter': 5,                # Number of random parameter combinations to try
     'cv': 2,                    # Cross-validation folds
     'n_jobs': -1,               # Use all available CPU cores
     'verbose': 2,               # Verbosity level
