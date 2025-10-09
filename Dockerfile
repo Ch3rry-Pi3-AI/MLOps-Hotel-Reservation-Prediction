@@ -48,5 +48,5 @@ RUN python pipeline/training_pipeline.py
 # -------------------------------------------------------------------
 # 🌐 Runtime
 # -------------------------------------------------------------------
-EXPOSE 5000
-CMD ["python", "application.py"]
+EXPOSE 8080
+CMD ["python", "app.py"]
