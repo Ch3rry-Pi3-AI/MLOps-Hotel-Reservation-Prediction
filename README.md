@@ -1,7 +1,3 @@
-Perfect 👍 — here’s the **fully updated README** for your **Data Preprocessing stage**, now including the “How to Run” section and preserving your established formatting and tone.
-
----
-
 # ⚙️ **Data Preprocessing — MLOps Hotel Reservation Prediction**
 
 This branch marks the transition from **notebook experimentation** to a **modular, reproducible data preprocessing pipeline**.
