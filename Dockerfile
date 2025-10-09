@@ -1,30 +1,52 @@
-# Use a lightweight Python image
-FROM python:slim
+# -------------------------------------------------------------------
+# 🧱 Base Image (pin to a version with PyArrow wheels)
+# -------------------------------------------------------------------
+FROM python:3.13-slim
 
-# Set environment variables to prevent Python from writing .pyc files & Ensure Python output is not buffered
+# -------------------------------------------------------------------
+# 🛠️ Environment
+# -------------------------------------------------------------------
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
 
 # Set the working directory
 WORKDIR /app
 
-# Install system dependencies required by LightGBM
+# -------------------------------------------------------------------
+# 📦 System dependencies
+# - libgomp1 is required by LightGBM
+# -------------------------------------------------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/*
 
-# Copy the application code
+# -------------------------------------------------------------------
+# 🔧 Python deps (install wheels first to avoid building from source)
+# Install pyarrow explicitly so it resolves to a prebuilt wheel on 3.13
+# -------------------------------------------------------------------
+RUN python -m pip install --upgrade pip \
+ && pip install "pyarrow==21.0.0"
+
+# -------------------------------------------------------------------
+# 📂 Copy project and install package
+# (If you have a requirements.txt or pyproject, you can copy+install
+#  those earlier to leverage build cache; this keeps it simple.)
+# -------------------------------------------------------------------
 COPY . .
 
-# Install the package in editable mode
-RUN pip install --no-cache-dir -e .
+# Install your package in editable mode
+RUN pip install -e .
 
-# Train the model before running the application
+# -------------------------------------------------------------------
+# 🧪 Optional: Train the model at build time (kept from your original)
+#   Note: many teams run training as a separate CI job or at runtime
+#         rather than during image build.
+# -------------------------------------------------------------------
 RUN python pipeline/training_pipeline.py
 
-# Expose the port that Flask will run on
+# -------------------------------------------------------------------
+# 🌐 Runtime
+# -------------------------------------------------------------------
 EXPOSE 5000
-
-# Command to run the app
 CMD ["python", "application.py"]
