@@ -17,20 +17,25 @@ Built to reduce revenue loss, improve guest retention, and provide a reproducibl
 
 ```mermaid
 flowchart LR
+  %% Row 1
   subgraph Row1[ ]
     direction LR
-    A[Hotel reservations CSV\nS3 or local file] --> B[Data ingestion]
-    B --> C[Raw artifacts]
-    C --> D[Preprocessing\nclean + encode + balance]
+    A[Hotel reservations CSV\nS3 or local file]
+      --> B[Data ingestion]
+      --> C[Raw artifacts]
+      --> D[Preprocessing\nclean + encode + balance]
   end
 
+  %% Row 2 (snakes back)
   subgraph Row2[ ]
-    direction LR
-    E[Processed features] --> F[Training\nLightGBM + MLflow]
-    F --> G[Model artifact\nlgbm_model.pkl]
-    G --> H[Flask inference app]
+    direction RL
+    E[Processed features]
+      --> F[Training\nLightGBM + MLflow]
+      --> G[Model artifact\nlgbm_model.pkl]
+      --> H[Flask inference app]
   end
 
+  %% Row connection
   D --> E
 ```
 
