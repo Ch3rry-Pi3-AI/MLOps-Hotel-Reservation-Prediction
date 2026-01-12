@@ -17,12 +17,16 @@ Designed to reduce revenue loss, improve guest retention, and ship a reproducibl
 
 ```mermaid
 flowchart LR
-    A[Hotel reservations CSV\nGCS or local file] --> B[Data ingestion]
+    A[Hotel reservations CSV
+GCS or local file] --> B[Data ingestion]
     B --> C[Raw artifacts]
-    C --> D[Preprocessing\nclean + encode + balance]
+    C --> D[Preprocessing
+clean + encode + balance]
     D --> E[Processed features]
-    E --> F[Training\nLightGBM + MLflow]
-    F --> G[Model artifact\nlgbm_model.pkl]
+    E --> F[Training
+LightGBM + MLflow]
+    F --> G[Model artifact
+lgbm_model.pkl]
     G --> H[Flask inference app]
 ```
 
@@ -30,15 +34,18 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    User[Browser] --> CR[Cloud Run\nFlask UI + API]
+    User[Browser] --> CR[Cloud Run
+Flask UI + API]
     CR --> GCS[(GCS: model + artifacts)]
     CR --> Logs[Cloud Logging]
 
-    Train[Training pipeline\nlocal or CI] --> GCS
+    Train[Training pipeline
+local or CI] --> GCS
     Train --> MLflow[MLflow Tracking]
     MLflow --> GCS
 
-    Jenkins[Jenkins CI/CD\nDocker-in-Docker] --> GCR[GCR]
+    Jenkins[Jenkins CI/CD
+Docker-in-Docker] --> GCR[GCR]
     GCR --> CR
 ```
 
