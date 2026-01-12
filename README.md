@@ -25,12 +25,13 @@ flowchart LR
   end
 
   subgraph Row2[ ]
-    direction RL
-    D --> E[Processed features]
-    E --> F[Training\nLightGBM + MLflow]
+    direction LR
+    E[Processed features] --> F[Training\nLightGBM + MLflow]
     F --> G[Model artifact\nlgbm_model.pkl]
     G --> H[Flask inference app]
   end
+
+  D --> E
 ```
 
 ## AWS Deployment Overview
