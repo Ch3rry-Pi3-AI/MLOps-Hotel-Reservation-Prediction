@@ -17,12 +17,16 @@ Built to reduce revenue loss, improve guest retention, and provide a reproducibl
 
 ```mermaid
 flowchart LR
-    A["Hotel reservations CSV\nS3 or local file"] --> B[Data ingestion]
+    A["Hotel reservations CSV
+S3 or local file"] --> B[Data ingestion]
     B --> C[Raw artifacts]
-    C --> D["Preprocessing\nclean + encode + balance"]
+    C --> D["Preprocessing
+clean + encode + balance"]
     D --> E[Processed features]
-    E --> F["Training\nLightGBM + MLflow"]
-    F --> G["Model artifact\nlgbm_model.pkl"]
+    E --> F["Training
+LightGBM + MLflow"]
+    F --> G["Model artifact
+lgbm_model.pkl"]
     G --> H[Flask inference app]
 ```
 
