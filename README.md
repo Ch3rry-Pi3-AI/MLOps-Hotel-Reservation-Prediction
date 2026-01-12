@@ -1,7 +1,7 @@
-# MLOps Hotel Reservation Prediction (AWS-first)
+# MLOps Hotel Reservation Prediction (GCP)
 
 End-to-end MLOps workflow for predicting hotel reservation cancellations, from ingestion to training and real-time inference.
-Built to reduce revenue loss, improve guest retention, and provide a reproducible ML delivery path with AWS-friendly deployment targets.
+Designed to reduce revenue loss, improve guest retention, and ship a reproducible ML pipeline with a containerized deployment path on GCP.
 
 <p align="center">
   <img src="img/flask_app/hotel_reservation_app.gif" alt="Flask Inference App Demo" width="820">
@@ -17,42 +17,37 @@ Built to reduce revenue loss, improve guest retention, and provide a reproducibl
 
 ```mermaid
 flowchart LR
-    A["Hotel reservations CSV
-S3 or local file"] --> B[Data ingestion]
+    A[Hotel reservations CSV\nGCS or local file] --> B[Data ingestion]
     B --> C[Raw artifacts]
-    C --> D["Preprocessing
-clean + encode + balance"]
+    C --> D[Preprocessing\nclean + encode + balance]
     D --> E[Processed features]
-    E --> F["Training
-LightGBM + MLflow"]
-    F --> G["Model artifact
-lgbm_model.pkl"]
+    E --> F[Training\nLightGBM + MLflow]
+    F --> G[Model artifact\nlgbm_model.pkl]
     G --> H[Flask inference app]
 ```
 
-## AWS Deployment Overview
+## GCP Deployment Overview
 
 ```mermaid
 flowchart LR
-    User[Browser] --> ALB[ALB / API Gateway]
-    ALB --> ECS[ECS or Fargate\nFlask UI + API]
-    ECS --> S3[(S3: model + artifacts)]
-    ECS --> CW[CloudWatch logs]
+    User[Browser] --> CR[Cloud Run\nFlask UI + API]
+    CR --> GCS[(GCS: model + artifacts)]
+    CR --> Logs[Cloud Logging]
 
-    Train[Training pipeline\nEC2 or SageMaker] --> S3
+    Train[Training pipeline\nlocal or CI] --> GCS
     Train --> MLflow[MLflow Tracking]
-    MLflow --> S3
+    MLflow --> GCS
 
-    Jenkins[Jenkins CI/CD] --> ECR[ECR]
-    ECR --> ECS
+    Jenkins[Jenkins CI/CD\nDocker-in-Docker] --> GCR[GCR]
+    GCR --> CR
 ```
 
-## Quick Start
+## Quick Start (Local)
 
 1) Install prerequisites:
    - Python 3.10+
    - Docker (optional, for container runs)
-   - AWS CLI (optional, for cloud deploys)
+   - gcloud CLI (optional, for GCP deployment)
 
 2) Create a virtual environment and install dependencies:
 ```bash
@@ -68,6 +63,7 @@ pip install -r requirements.txt
 3) Configure the pipeline:
    - Update `config/config.yaml` for your data source and feature settings.
    - Review `config/paths_config.py` for artifact locations.
+   - If ingesting from GCS, set `GOOGLE_APPLICATION_CREDENTIALS` to your service account key JSON path.
 
 4) Run end-to-end training:
 ```bash
@@ -80,13 +76,28 @@ python app.py
 # open http://localhost:8080
 ```
 
+## CI/CD Pipeline (Jenkins + GCP)
+
+The main branch includes a Jenkins pipeline that automates build, test, containerization, and deployment to Cloud Run.
+
+Stages (high level):
+1) Setup Jenkins container (Docker-in-Docker)
+2) GitHub integration
+3) Dockerize the project
+4) Create a venv inside Jenkins
+5) Build image and push to GCR
+6) Deploy to Cloud Run
+7) Optional cleanup of cloud resources
+
+See `custom_jenkins/README.md` for detailed setup steps, screenshots, and GCP credential configuration.
+
 ## Tech Stack
 
 - Front end: HTML + CSS, Jinja2 templates.
 - Back end: Flask (Python), model loading with joblib.
 - ML: LightGBM, scikit-learn, SMOTE, MLflow tracking.
 - MLOps: Docker, Jenkins CI/CD.
-- AWS services (deployment targets): S3, ECR, ECS/Fargate, CloudWatch, IAM/Secrets Manager.
+- GCP services: GCS, GCR, Cloud Run, IAM/Service Accounts, Cloud Logging.
 
 ## Project Structure
 
@@ -120,12 +131,6 @@ python app.py
 - Preprocessing: label encoding, log transforms, SMOTE balancing.
 - Training: LightGBM with RandomizedSearchCV.
 - Metrics: accuracy, precision, recall, F1.
-
-## CI/CD and Deployment Notes
-
-- Jenkins builds and tests the project, then produces a Docker image.
-- Push images to ECR and deploy to ECS/Fargate or App Runner.
-- Store artifacts and model files in S3 for reproducible runs.
 
 ## License and Credits
 
