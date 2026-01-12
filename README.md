@@ -31,7 +31,6 @@ flowchart LR
     F --> G[Model artifact\nlgbm_model.pkl]
     G --> H[Flask inference app]
   end
-
 ```
 
 ## AWS Deployment Overview
