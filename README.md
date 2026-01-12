@@ -1,74 +1,56 @@
-# 🏨 MLOps — Hotel Reservation Prediction
+# MLOps Hotel Reservation Prediction (AWS-first)
 
-Predict booking outcomes end-to-end: ingest data → process → train → serve → ship.
-This repository walks through the full MLOps lifecycle across sequential Git branches, so you can learn or reproduce the project one stage at a time.
+End-to-end MLOps workflow for predicting hotel reservation cancellations, from ingestion to training and real-time inference.
+Built to reduce revenue loss, improve guest retention, and provide a reproducible ML delivery path with AWS-friendly deployment targets.
 
 <p align="center">
   <img src="img/flask_app/hotel_reservation_app.gif" alt="Flask Inference App Demo" width="820">
 </p>
 
-## Why this project?
+## Why this project
 
-Hotels lose revenue when bookings are cancelled late. A reliable predictor helps operations and revenue teams take action earlier.
+- Reduce late cancellations with early risk signals.
+- Improve revenue planning with consistent, measurable model performance.
+- Ship an inference UI/API quickly with container-ready deployments.
 
-### Core use-cases
+## MLOps Flow
 
-* **Cancellation risk:** Predict whether a reservation will be cancelled so inventory can be double-protected (e.g., overbooking strategy) with lower risk.
-* **Proactive retention:** Identify guests with medium–high risk and offer incentives (discount codes, upgrades) to reduce churn.
-* **Fraud/abuse management:** Detect guests with a history of repeated cancellations and flag for manual review or potential bans.
-
-## Project at a glance
-
-* **Data:** Hotel reservation classification dataset (tabular).
-* **Modelling:** LightGBM classifier with hyper-parameter search and MLflow tracking.
-* **Serving:** Flask app for real-time inference.
-* **CI/CD:** Jenkins (DinD) pipeline → build image → push to GCR → deploy to Cloud Run.
-
-## Branch-by-branch roadmap
-
-Each branch adds a focused layer. Check out branches in order to build the project progressively.
-
-1. `00_project_setup` — Initial Project Setup
-   Foundational Python package structure, centralised logging, custom exception handling, and repo hygiene.
-2. `01_data_ingestion` — Data Ingestion from GCP
-   Pull dataset from Google Cloud Storage, save raw extract, create train/test splits, and configure paths via YAML.
-3. `02_notebook_experimentation` — Exploratory Analysis
-   Jupyter notebook for EDA, preprocessing experiments, quick baselines, and feature importance exploration.
-4. `03_data_processing` — Data Preprocessing
-   Production-ready script that cleans, encodes, balances (SMOTE), and selects features. Outputs processed train/test CSVs.
-5. `04_model_training` — Model Training
-   Train a LightGBM model with RandomizedSearchCV, evaluate on hold-out data, persist artefacts, and log to MLflow.
-6. `05_training_pipeline` — Unified Training Pipeline
-   Orchestrate ingestion → processing → training via a single pipeline entrypoint to ensure repeatability.
-7. `06_flask_app` — Inference Serving
-   Flask application that loads the trained model and serves a web form + prediction endpoint.
-8. `07_cicd_pipeline` — CI/CD Automation
-   Jenkins-in-Docker pipeline to build, push, and deploy the container to Google Cloud Run.
-
-## How to follow along locally
-
-```bash
-# 1) Clone once
-git clone <your-repo-url>
-cd mlops-hotel-reservation-prediction
-
-# 2) Start from the beginning
-git checkout 00_project_setup
-
-# 3) Progress step-by-step
-git checkout 01_data_ingestion
-git checkout 02_notebook_experimentation
-git checkout 03_data_processing
-git checkout 04_model_training
-git checkout 05_training_pipeline
-git checkout 06_flask_app
-git checkout 07_cicd_pipeline
+```mermaid
+flowchart LR
+    A[Hotel reservations CSV\nS3 or local file] --> B[Data ingestion]
+    B --> C[Raw artifacts]
+    C --> D[Preprocessing\nclean + encode + balance]
+    D --> E[Processed features]
+    E --> F[Training\nLightGBM + MLflow]
+    F --> G[Model artifact\nlgbm_model.pkl]
+    G --> H[Flask inference app]
 ```
 
-## Quickstart (main branch)
+## AWS Deployment Overview
 
-### 1) Environment
+```mermaid
+flowchart LR
+    User[Browser] --> ALB[ALB / API Gateway]
+    ALB --> ECS[ECS or Fargate\nFlask UI + API]
+    ECS --> S3[(S3: model + artifacts)]
+    ECS --> CW[CloudWatch logs]
 
+    Train[Training pipeline\nEC2 or SageMaker] --> S3
+    Train --> MLflow[MLflow Tracking]
+    MLflow --> S3
+
+    Jenkins[Jenkins CI/CD] --> ECR[ECR]
+    ECR --> ECS
+```
+
+## Quick Start
+
+1) Install prerequisites:
+   - Python 3.10+
+   - Docker (optional, for container runs)
+   - AWS CLI (optional, for cloud deploys)
+
+2) Create a virtual environment and install dependencies:
 ```bash
 python -m venv venv
 # Windows
@@ -79,99 +61,70 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2) Configuration
+3) Configure the pipeline:
+   - Update `config/config.yaml` for your data source and feature settings.
+   - Review `config/paths_config.py` for artifact locations.
 
-Set the paths and parameters in `config/config.yaml` and `config/paths_config.py`.
-For GCP access (data ingestion), set `GOOGLE_APPLICATION_CREDENTIALS` to your service-account key path.
-
-### 3) Run end-to-end training (pipeline)
-
+4) Run end-to-end training:
 ```bash
 python pipeline/training_pipeline.py
 ```
 
-This will:
-
-* Ingest data (from configured source)
-* Process data (clean, encode, balance, select features)
-* Train and evaluate LightGBM
-* Save model to `artifacts/models/lgbm_model.pkl`
-* Log run to MLflow
-
-### 4) Launch the Flask app (inference)
-
+5) Launch the inference app:
 ```bash
 python app.py
 # open http://localhost:8080
 ```
 
-Enter booking details to get an instant prediction (cancel / honour).
-The GIF at the top shows the expected flow.
+## Tech Stack
 
-## 📁 Actual Project Structure
+- Front end: HTML + CSS, Jinja2 templates.
+- Back end: Flask (Python), model loading with joblib.
+- ML: LightGBM, scikit-learn, SMOTE, MLflow tracking.
+- MLOps: Docker, Jenkins CI/CD.
+- AWS services (deployment targets): S3, ECR, ECS/Fargate, CloudWatch, IAM/Secrets Manager.
 
-```
-mlops-hotel-reservation-prediction/
-├── artifacts/
-├── config/
-│   ├── config.yaml
-│   ├── model_params.py
-│   └── paths_config.py
-├── custom_jenkins/
-│   └── Dockerfile
-├── img/
-├── logs/
-├── MLOps_Hotel_Reservation_Prediction.egg-info/
-├── mlruns/
-├── notebook/
-│   ├── notebook.ipynb
-│   └── random_forest.pkl
-├── pipeline/
-│   └── training_pipeline.py
-├── src/
-│   ├── custom_exception.py
-│   ├── data_ingestion.py
-│   ├── data_preprocessing.py
-│   ├── logger.py
-│   └── model_training.py
-├── static/
-│   └── style.css
-├── templates/
-│   └── index.html
-├── utils/
-│   └── common_functions.py
-├── venv/
-├── .gitignore
-├── app.py
-├── Dockerfile
-├── Jenkinsfile
-├── requirements.txt
-└── setup.py
-```
+## Project Structure
 
-## ML details (concise)
+- `app.py`: Flask inference server and UI.
+- `pipeline/`: End-to-end training pipeline entrypoint.
+- `src/`: Ingestion, preprocessing, training modules.
+- `config/`: YAML + params + paths configuration.
+- `templates/` + `static/`: UI templates and CSS.
+- `notebook/`: EDA and experimentation.
+- `custom_jenkins/`: Jenkins DinD Dockerfile for CI/CD.
+- `artifacts/`: Raw, processed, and model outputs.
+- `mlruns/`: Local MLflow experiment tracking.
+- `Dockerfile`, `Jenkinsfile`: container build + pipeline automation.
 
-* **Target:** `booking_status` (cancelled vs honoured).
-* **Features:** Mix of numeric and categorical booking attributes (lead time, room type, special requests, etc.).
-* **Preprocessing:** Label encoding, skewness handling, SMOTE for class balance, feature selection via Random Forest importance.
-* **Model:** LightGBM with search over learning rate, leaves, depth, etc.
-* **Metrics:** Accuracy, Precision, Recall, F1 on held-out test set.
-* **Tracking:** MLflow for parameters, metrics, artefacts.
+## Guides
 
-## CI/CD overview (Jenkins → Cloud Run)
+- `config/README.md` - configuration details.
+- `pipeline/README.md` - training pipeline flow.
+- `src/README.md` - core modules and responsibilities.
+- `templates/README.md` - UI template behavior.
+- `static/README.md` - UI styling system.
+- `custom_jenkins/README.md` - Jenkins DinD setup.
+- `notebook/README.md` - notebook usage.
+- `artifacts/README.md` - output layout.
+- `utils/README.md` - shared helpers.
 
-* Jenkins (DinD) builds and tests the project.
-* Builds a Docker image and pushes to Google Container/Artifact Registry.
-* Deploys to Google Cloud Run (fully managed, autoscaling).
-* Outputs a public service URL for the Flask API/UI.
+## Model Details (Concise)
 
-## Open-source licence
+- Target: `booking_status` (cancelled vs honored).
+- Features: lead time, room type, special requests, pricing, and stay length.
+- Preprocessing: label encoding, log transforms, SMOTE balancing.
+- Training: LightGBM with RandomizedSearchCV.
+- Metrics: accuracy, precision, recall, F1.
 
-This project is released under the **MIT License**.
-You are free to use, modify, and distribute the code with attribution.
-A `LICENSE` file can be added to the repository root with the full MIT text if needed.
+## CI/CD and Deployment Notes
 
-## Acknowledgements
+- Jenkins builds and tests the project, then produces a Docker image.
+- Push images to ECR and deploy to ECS/Fargate or App Runner.
+- Store artifacts and model files in S3 for reproducible runs.
 
-* Dataset: Hotel Reservations Classification (Kaggle)
-* Libraries: pandas, scikit-learn, imbalanced-learn, lightgbm, MLflow, Flask
+## License and Credits
+
+- License: MIT (add `LICENSE` if needed).
+- Dataset: Hotel Reservations Classification (Kaggle).
+- Libraries: pandas, scikit-learn, imbalanced-learn, lightgbm, MLflow, Flask.
