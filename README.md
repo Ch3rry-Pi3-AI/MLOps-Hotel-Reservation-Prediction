@@ -17,13 +17,21 @@ Built to reduce revenue loss, improve guest retention, and provide a reproducibl
 
 ```mermaid
 flowchart LR
+  subgraph Row1[ ]
+    direction LR
     A[Hotel reservations CSV\nS3 or local file] --> B[Data ingestion]
     B --> C[Raw artifacts]
     C --> D[Preprocessing\nclean + encode + balance]
+  end
+
+  subgraph Row2[ ]
+    direction RL
     D --> E[Processed features]
     E --> F[Training\nLightGBM + MLflow]
     F --> G[Model artifact\nlgbm_model.pkl]
     G --> H[Flask inference app]
+  end
+
 ```
 
 ## AWS Deployment Overview
