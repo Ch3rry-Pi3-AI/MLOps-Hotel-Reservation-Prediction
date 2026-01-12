@@ -1,4 +1,4 @@
-# MLOps Hotel Reservation Prediction (GCP)
+# MLOps | Hotel Reservation Prediction (GCP)
 
 End-to-end MLOps workflow for predicting hotel reservation cancellations, from ingestion to training and real-time inference.
 Designed to reduce revenue loss, improve guest retention, and ship a reproducible ML pipeline with a containerized deployment path on GCP.
